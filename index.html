@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>Global Command Center | 雙向通訊主控台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .bg-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; object-fit: cover; filter: brightness(0.12); }
+        .stage { position: relative; z-index: 10; height: 100vh; display: flex; flex-direction: column; }
+        .tab-btn { transition: all 0.2s; color: #94a3b8; font-size: 11px; font-weight: 800; border-radius: 4px; }
+        .tab-btn.active { background: #eab308; color: #000; }
+        .view-container { flex: 1; display: none; }
+        .view-container.active { display: block; }
+        iframe { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body class="bg-black text-slate-100 overflow-hidden font-sans">
+    <img src="6.jpg" class="bg-layer" onerror="this.src='https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200'">
+
+    <div class="stage">
+        <nav class="bg-slate-900/95 border-b border-white/10 p-3 flex items-center justify-between">
+            <div class="flex items-center gap-6">
+                <button onclick="switchTab('hub')" id="btn-hub" class="tab-btn active px-4 py-2 uppercase">🛰️ HUB 總覽</button>
+                
+                <div class="h-6 w-[1px] bg-white/10"></div>
+
+                <div class="flex flex-col gap-1">
+                    <span class="text-[8px] text-slate-500 font-bold tracking-widest">MY GEAR (DIRECTOR)</span>
+                    <div class="flex gap-1">
+                        <button onclick="switchTab('d-out')" id="btn-d-out" class="tab-btn px-3 py-1 uppercase">發送(中)</button>
+                        <button onclick="switchTab('d-in')" id="btn-d-in" class="tab-btn px-3 py-1 uppercase">接收(印)</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <span class="text-[8px] text-blue-500 font-bold tracking-widest">ENGINEER SIDE</span>
+                    <div class="flex gap-1">
+                        <button onclick="switchTab('e-out')" id="btn-e-out" class="tab-btn px-3 py-1 uppercase border border-blue-900">發送(印)</button>
+                        <button onclick="switchTab('e-in')" id="btn-e-in" class="tab-btn px-3 py-1 uppercase border border-blue-900">接收(中)</button>
+                    </div>
+                </div>
+            </div>
+            <div class="text-[10px] font-mono text-yellow-500 font-bold">SYSTEM ACTIVE</div>
+        </nav>
+
+        <div id="view-hub" class="view-container active"><iframe src="環球協作指揮中心.html"></iframe></div>
+        <div id="view-d-out" class="view-container"><iframe src="director_out.html"></iframe></div>
+        <div id="view-d-in" class="view-container"><iframe src="director_in.html"></iframe></div>
+        <div id="view-e-out" class="view-container"><iframe src="engineer_out.html"></iframe></div>
+        <div id="view-e-in" class="view-container"><iframe src="engineer_in.html"></iframe></div>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + tabId).classList.add('active');
+            document.getElementById('btn-' + tabId).classList.add('active');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>body { background: transparent; color: white; }</style>
+</head>
+<body class="p-4">
+    <div class="bg-slate-900/90 p-6 rounded-2xl border border-blue-500/30 max-w-md mx-auto text-center">
+        <h2 class="text-blue-500 text-xs font-black mb-4 uppercase">Engineer IN (From Director)</h2>
+        <div id="signalDisplay" class="bg-black/50 p-6 rounded-lg border border-white/5 min-h-[100px] flex items-center justify-center font-bold text-lg text-slate-200">
+            Wait for signal...
+        </div>
+        <p class="text-[10px] text-slate-500 mt-4 italic">💡 Right-click to Translate to Hindi</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyDCOnj1LQU3BqCrbec9VP9Wg1v-AJrrpMw",
+          authDomain: "global-command-center-6235f.firebaseapp.com",
+          projectId: "global-command-center-6235f",
+          storageBucket: "global-command-center-6235f.firebasestorage.app",
+          messagingSenderId: "241628307606",
+          appId: "1:241628307606:web:7d5e3f60394671632062b7",
+          measurementId: "G-F4S7S0XH5Q"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        onSnapshot(doc(db, "signals", "d_to_e"), (docSnap) => {
+            if (docSnap.exists()) {
+                document.getElementById('signalDisplay').innerText = docSnap.data().msg;
+            }
+        });
+    </script>
+</body>
+</html>

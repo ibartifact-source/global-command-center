@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>body { background: transparent; color: white; }</style>
+</head>
+<body class="p-4">
+    <div class="bg-slate-900/90 p-6 rounded-2xl border border-yellow-500/30 max-w-md mx-auto">
+        <h2 class="text-yellow-500 text-xs font-black mb-4 uppercase">Director OUT (CN)</h2>
+        <textarea id="msgInput" class="w-full h-32 bg-black border border-white/10 rounded-lg p-3 text-white outline-none focus:border-yellow-500" placeholder="在此輸入中文指令..."></textarea>
+        <button onclick="sendSignal()" class="w-full mt-4 bg-yellow-500 text-black font-black py-3 rounded-lg uppercase">發送訊號</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyDCOnj1LQU3BqCrbec9VP9Wg1v-AJrrpMw",
+          authDomain: "global-command-center-6235f.firebaseapp.com",
+          projectId: "global-command-center-6235f",
+          storageBucket: "global-command-center-6235f.firebasestorage.app",
+          messagingSenderId: "241628307606",
+          appId: "1:241628307606:web:7d5e3f60394671632062b7",
+          measurementId: "G-F4S7S0XH5Q"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.sendSignal = async () => {
+            const val = document.getElementById('msgInput').value.trim();
+            if(!val) return;
+            await setDoc(doc(db, "signals", "d_to_e"), {
+                msg: val,
+                timestamp: serverTimestamp()
+            });
+            document.getElementById('msgInput').value = "";
+            alert("發送成功");
+        };
+    </script>
+</body>
+</html>
