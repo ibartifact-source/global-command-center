@@ -2,107 +2,95 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Dual-Link Console</title>
+    <title>Global Command Center | 跨國指揮中心</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 物理規則：背景層必須位於 body 之上 (z-index >= 1) */
-        .bg-layer { 
-            position: fixed; top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            z-index: 1; 
-            object-fit: cover; 
-            filter: brightness(0.12); 
-        }
-        /* 內容層必須位於背景層之上 (z-index > 背景) */
+        /* 物理規則：背景層 z-index: 1 */
+        .bg-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; object-fit: cover; filter: brightness(0.15); }
+        /* 內容層 z-index: 10 */
         .stage { position: relative; z-index: 10; height: 100vh; display: flex; flex-direction: column; }
         
-        .tab-group-label { font-size: 9px; color: #475569; font-weight: 900; letter-spacing: 0.2em; margin-bottom: 2px; }
-        .tab-btn { transition: all 0.2s; border-radius: 6px; color: #94a3b8; font-size: 11px; font-weight: 800; }
-        .tab-btn:hover { background: rgba(255,255,255,0.05); }
-        .tab-btn.active { background: #eab308; color: #000; box-shadow: 0 0 15px rgba(234, 179, 8, 0.4); }
+        .tab-btn { transition: all 0.2s; color: #64748b; font-size: 11px; font-weight: 800; border-radius: 4px; border: 1px solid transparent; }
+        .tab-btn.active { background: #eab308; color: #000; border-color: #eab308; }
+        .tab-btn:hover:not(.active) { border-color: rgba(234, 179, 8, 0.5); color: #fff; }
         
         .view-container { flex: 1; display: none; }
         .view-container.active { display: block; }
         iframe { width: 100%; height: 100%; border: none; }
+
+        /* 主畫面內部格子樣式 */
+        .iframe-box { 
+            background: rgba(15, 23, 42, 0.9); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 12px; height: 100%; overflow: hidden; 
+        }
     </style>
 </head>
 <body class="bg-black text-slate-100 overflow-hidden font-sans">
-
     <img src="6.jpg" class="bg-layer" onerror="this.src='https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200'">
 
     <div class="stage">
-        <nav class="bg-slate-900/95 backdrop-blur-2xl border-b border-white/10 p-3 flex items-center justify-between shadow-2xl">
-            <div class="flex items-center gap-8">
-                <div class="flex flex-col items-center">
-                    <button onclick="switchTab('hub')" id="btn-hub" class="tab-btn active px-4 py-3 uppercase tracking-tighter">
-                        🛰️ HUB 總覽
-                    </button>
-                </div>
-
-                <div class="w-[1px] h-10 bg-white/10"></div>
-
-                <div class="flex flex-col">
-                    <span class="tab-group-label">DIRECTOR SIDE (CN)</span>
+        <nav class="bg-slate-900/95 border-b border-white/10 p-3 flex items-center justify-between shadow-2xl">
+            <div class="flex items-center gap-6">
+                <button onclick="switchTab('hub')" id="btn-hub" class="tab-btn active px-4 py-2 text-sm">🛰️ HUB 總覽</button>
+                <div class="h-6 w-[1px] bg-white/10"></div>
+                
+                <div class="flex flex-col gap-1">
+                    <span class="text-[8px] text-yellow-500 font-black tracking-widest uppercase px-1">Director (CN)</span>
                     <div class="flex gap-1">
-                        <button onclick="switchTab('send-cn')" id="btn-send-cn" class="tab-btn px-4 py-1.5 uppercase">發送端</button>
-                        <button onclick="switchTab('recv-in')" id="btn-recv-in" class="tab-btn px-4 py-1.5 uppercase">接收端</button>
+                        <button onclick="switchTab('d-out')" id="btn-d-out" class="tab-btn px-3 py-1 uppercase">發送機</button>
+                        <button onclick="switchTab('d-in')" id="btn-d-in" class="tab-btn px-3 py-1 uppercase">接收機</button>
                     </div>
                 </div>
 
-                <div class="w-[1px] h-6 bg-white/5"></div>
-
-                <div class="flex flex-col">
-                    <span class="tab-group-label text-blue-500">ENGINEER SIDE (IN)</span>
+                <div class="flex flex-col gap-1">
+                    <span class="text-[8px] text-blue-500 font-black tracking-widest uppercase px-1">Engineer (IN)</span>
                     <div class="flex gap-1">
-                        <button onclick="switchTab('send-in')" id="btn-send-in" class="tab-btn px-4 py-1.5 uppercase border border-blue-500/30">發送端</button>
-                        <button onclick="switchTab('recv-cn')" id="btn-recv-cn" class="tab-btn px-4 py-1.5 uppercase border border-blue-500/30">接收端</button>
+                        <button onclick="switchTab('e-out')" id="btn-e-out" class="tab-btn px-3 py-1 uppercase border border-blue-900/50">發送機</button>
+                        <button onclick="switchTab('e-in')" id="btn-e-in" class="tab-btn px-3 py-1 uppercase border border-blue-900/50">接收機</button>
                     </div>
                 </div>
             </div>
-
-            <div class="flex flex-col items-end px-4">
-                <span class="text-[10px] font-black text-yellow-500 italic tracking-widest">COMMAND CONSOLE v2.0</span>
-                <span id="live-clock" class="text-[9px] font-mono text-slate-500">00:00:00</span>
-            </div>
+            <div class="hidden md:block text-[10px] font-mono text-yellow-500 font-bold bg-yellow-500/10 px-3 py-1 rounded border border-yellow-500/20 animate-pulse">SYSTEM ACTIVE</div>
         </nav>
 
-        <div id="view-hub" class="view-container active">
-            <div class="flex flex-col items-center justify-center h-full text-slate-500">
-                <h1 class="text-4xl font-black italic tracking-tighter text-yellow-500 mb-2">SYSTEM ACTIVE</h1>
-                <p class="text-[10px] uppercase tracking-[0.5em]">Global Dual-Link Established</p>
+        <div id="view-hub" class="view-container active p-6 overflow-y-auto">
+            <div class="max-w-7xl mx-auto h-full flex flex-col">
+                <div class="text-center mb-6">
+                    <h1 class="text-2xl font-black tracking-[0.3em] text-yellow-500 italic uppercase">GLOBAL COMMAND HUB</h1>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 flex-1 min-h-[600px]">
+                    <div class="md:col-span-4 flex flex-col gap-4">
+                        <div class="h-1/2 flex flex-col"><span class="text-[9px] mb-1 font-bold text-blue-400">OUTBOUND (CN)</span><div class="iframe-box"><iframe src="director_out.html"></iframe></div></div>
+                        <div class="h-1/2 flex flex-col"><span class="text-[9px] mb-1 font-bold text-slate-500">INBOUND (IN)</span><div class="iframe-box"><iframe src="director_in.html"></iframe></div></div>
+                    </div>
+                    <div class="md:col-span-4 flex items-center justify-center p-4">
+                        <div class="text-center border-2 border-yellow-500/30 bg-slate-900/80 rounded-[2rem] p-8 w-full">
+                            <span class="text-4xl block mb-4 animate-bounce">🛰️</span>
+                            <div class="bg-black/50 py-3 px-4 rounded-xl border border-yellow-500/20 text-green-400 font-black italic text-sm">物理規則對齊中</div>
+                        </div>
+                    </div>
+                    <div class="md:col-span-4 flex flex-col gap-4">
+                        <div class="h-1/2 flex flex-col"><span class="text-[9px] mb-1 font-bold text-orange-500">OUTBOUND (IN)</span><div class="iframe-box"><iframe src="engineer_out.html"></iframe></div></div>
+                        <div class="h-1/2 flex flex-col"><span class="text-[9px] mb-1 font-bold text-slate-500">INBOUND (CN)</span><div class="iframe-box"><iframe src="engineer_in.html"></iframe></div></div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="view-send-cn" class="view-container">
-            <iframe src="director_out.html"></iframe>
-        </div>
-
-        <div id="view-recv-in" class="view-container">
-            <iframe src="director_in.html"></iframe>
-        </div>
-
-        <div id="view-send-in" class="view-container">
-            <iframe src="engineer_out.html"></iframe>
-        </div>
-
-        <div id="view-recv-cn" class="view-container">
-            <iframe src="engineer_in.html"></iframe>
-        </div>
+        <div id="view-d-out" class="view-container"><iframe src="director_out.html"></iframe></div>
+        <div id="view-d-in" class="view-container"><iframe src="director_in.html"></iframe></div>
+        <div id="view-e-out" class="view-container"><iframe src="engineer_out.html"></iframe></div>
+        <div id="view-e-in" class="view-container"><iframe src="engineer_in.html"></iframe></div>
     </div>
 
     <script>
         function switchTab(tabId) {
             document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            
             document.getElementById('view-' + tabId).classList.add('active');
             document.getElementById('btn-' + tabId).classList.add('active');
         }
-
-        setInterval(() => {
-            document.getElementById('live-clock').innerText = new Date().toLocaleTimeString();
-        }, 1000);
     </script>
 </body>
 </html>
