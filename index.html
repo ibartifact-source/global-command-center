@@ -5,10 +5,13 @@
     <title>Global Command Center | 雙向通訊主控台</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* 物理規則：背景層 z-index: 1 */
         .bg-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; object-fit: cover; filter: brightness(0.12); }
+        /* 內容層 z-index: 10 */
         .stage { position: relative; z-index: 10; height: 100vh; display: flex; flex-direction: column; }
-        .tab-btn { transition: all 0.2s; color: #94a3b8; font-size: 11px; font-weight: 800; border-radius: 4px; }
-        .tab-btn.active { background: #eab308; color: #000; }
+        
+        .tab-btn { transition: all 0.2s; color: #94a3b8; font-size: 11px; font-weight: 800; border-radius: 4px; border: 1px solid transparent; }
+        .tab-btn.active { background: #eab308; color: #000; border-color: #eab308; }
         .view-container { flex: 1; display: none; }
         .view-container.active { display: block; }
         iframe { width: 100%; height: 100%; border: none; }
@@ -18,29 +21,26 @@
     <img src="6.jpg" class="bg-layer" onerror="this.src='https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200'">
 
     <div class="stage">
-        <nav class="bg-slate-900/95 border-b border-white/10 p-3 flex items-center justify-between">
+        <nav class="bg-slate-900/95 border-b border-white/10 p-3 flex items-center justify-between shadow-2xl">
             <div class="flex items-center gap-6">
                 <button onclick="switchTab('hub')" id="btn-hub" class="tab-btn active px-4 py-2 uppercase">🛰️ HUB 總覽</button>
-                
                 <div class="h-6 w-[1px] bg-white/10"></div>
-
                 <div class="flex flex-col gap-1">
-                    <span class="text-[8px] text-slate-500 font-bold tracking-widest">MY GEAR (DIRECTOR)</span>
+                    <span class="text-[8px] text-yellow-500 font-bold tracking-widest px-1">MY GEAR (DIRECTOR)</span>
                     <div class="flex gap-1">
                         <button onclick="switchTab('d-out')" id="btn-d-out" class="tab-btn px-3 py-1 uppercase">發送(中)</button>
                         <button onclick="switchTab('d-in')" id="btn-d-in" class="tab-btn px-3 py-1 uppercase">接收(印)</button>
                     </div>
                 </div>
-
                 <div class="flex flex-col gap-1">
-                    <span class="text-[8px] text-blue-500 font-bold tracking-widest">ENGINEER SIDE</span>
+                    <span class="text-[8px] text-blue-500 font-bold tracking-widest px-1">ENGINEER SIDE</span>
                     <div class="flex gap-1">
-                        <button onclick="switchTab('e-out')" id="btn-e-out" class="tab-btn px-3 py-1 uppercase border border-blue-900">發送(印)</button>
-                        <button onclick="switchTab('e-in')" id="btn-e-in" class="tab-btn px-3 py-1 uppercase border border-blue-900">接收(中)</button>
+                        <button onclick="switchTab('e-out')" id="btn-e-out" class="tab-btn px-3 py-1 uppercase border border-blue-900/50">發送(印)</button>
+                        <button onclick="switchTab('e-in')" id="btn-e-in" class="tab-btn px-3 py-1 uppercase border border-blue-900/50">接收(中)</button>
                     </div>
                 </div>
             </div>
-            <div class="text-[10px] font-mono text-yellow-500 font-bold">SYSTEM ACTIVE</div>
+            <div class="text-[10px] font-mono text-yellow-500 font-bold bg-yellow-500/10 px-3 py-1 rounded border border-yellow-500/20 animate-pulse">SYSTEM ACTIVE</div>
         </nav>
 
         <div id="view-hub" class="view-container active"><iframe src="環球協作指揮中心.html"></iframe></div>
