@@ -1,41 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>body { background: transparent; color: white; }</style>
+    <style>
+        /* 保持簡潔風格，確保右鍵翻譯選單不會被遮擋 */
+        body { background: transparent; color: white; }
+        .msg-content { transition: all 0.3s ease; }
+        .sync-flash { animation: flash 0.5s ease-out; }
+        @keyframes flash {
+            0% { background: rgba(234, 179, 8, 0.5); }
+            100% { background: transparent; }
+        }
+    </style>
 </head>
 <body class="p-4">
-    <div class="bg-slate-900/90 p-6 rounded-2xl border border-yellow-500/30 max-w-md mx-auto text-center">
-        <h2 class="text-yellow-500 text-xs font-black mb-4 uppercase">Director IN (From Engineer)</h2>
-        <div id="signalDisplay" class="bg-black/50 p-6 rounded-lg border border-white/5 min-h-[100px] flex items-center justify-center font-bold text-lg text-slate-200">
-            等待工程師回覆...
-        </div>
-        <p class="text-[10px] text-slate-500 mt-4 italic">💡 點擊右鍵翻譯成中文</p>
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xs font-black text-yellow-500 tracking-tighter uppercase">Incoming Stream</h2>
+        <button onclick="forceTranslateSync()" 
+                class="bg-yellow-500 hover:bg-yellow-400 text-black text-[10px] font-black px-3 py-1 rounded shadow-lg flex items-center gap-1 active:scale-95 transition-all">
+            <span>🔄</span> SYNC & TRANSLATE
+        </button>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+    <div id="message-display" class="bg-black/40 border border-white/10 rounded-lg p-4 min-h-[200px] msg-content">
+        <p class="text-sm leading-relaxed" id="text-target">
+            Waiting for incoming message from engineer...
+        </p>
+    </div>
 
-        const firebaseConfig = {
-          apiKey: "AIzaSyDCOnj1LQU3BqCrbec9VP9Wg1v-AJrrpMw",
-          authDomain: "global-command-center-6235f.firebaseapp.com",
-          projectId: "global-command-center-6235f",
-          storageBucket: "global-command-center-6235f.firebasestorage.app",
-          messagingSenderId: "241628307606",
-          appId: "1:241628307606:web:7d5e3f60394671632062b7",
-          measurementId: "G-F4S7S0XH5Q"
-        };
+    <script>
+        function forceTranslateSync() {
+            const target = document.getElementById('text-target');
+            const originalText = target.innerText;
+            
+            // 1. 物理清空：誘發 Chrome 偵測變動
+            target.innerText = "";
+            
+            // 2. 短暫延遲後重新填入內容
+            setTimeout(() => {
+                target.innerText = originalText;
+                
+                // 3. 視覺反饋：閃爍提醒同步完成
+                const container = document.getElementById('message-display');
+                container.classList.add('sync-flash');
+                setTimeout(() => container.classList.remove('sync-flash'), 500);
+                
+                // 💡 提示：此時點擊右鍵「翻譯成中文」，Chrome 會更穩定地鎖定此區塊
+                console.log("Translation trigger sent to browser.");
+            }, 50);
+        }
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        onSnapshot(doc(db, "signals", "e_to_d"), (docSnap) => {
-            if (docSnap.exists()) {
-                document.getElementById('signalDisplay').innerText = docSnap.data().msg;
-            }
-        });
+        // 模擬自動接收訊息時也觸發同步 (如果是你原本就有的接收邏輯，請把此函式套進去)
+        // function onNewMessageArrive(newText) {
+        //    document.getElementById('text-target').innerText = newText;
+        //    forceTranslateSync(); 
+        // }
     </script>
 </body>
 </html>
