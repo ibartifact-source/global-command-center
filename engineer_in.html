@@ -1,68 +1,39 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html>
 <head>
     <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background: transparent; color: white; }
-        .msg-content { transition: all 0.3s ease; }
-        .sync-flash { animation: flash 0.5s ease-out; }
-        @keyframes flash {
-            0% { background: rgba(234, 179, 8, 0.5); }
-            100% { background: transparent; }
-        }
-    </style>
+    <style>body { background: transparent; color: white; }</style>
 </head>
 <body class="p-4">
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xs font-black text-blue-500 tracking-tighter uppercase">Incoming Stream (From Director)</h2>
-        <button onclick="window.forceTranslateSync()" 
-                class="bg-blue-500 hover:bg-blue-400 text-black text-[10px] font-black px-3 py-1 rounded shadow-lg flex items-center gap-1 active:scale-95 transition-all">
-            <span>🔄</span> SYNC & TRANSLATE
-        </button>
-    </div>
-
-    <div id="message-display" class="bg-black/40 border border-white/10 rounded-lg p-4 min-h-[200px] msg-content">
-        <p class="text-sm leading-relaxed" id="text-target">
-            Waiting for incoming message from director...
+    <div class="bg-slate-900/95 p-6 rounded-2xl border-2 border-blue-500/50 max-w-md mx-auto shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-blue-500 text-xs font-black uppercase tracking-[0.2em]">Engineer Receiver</h2>
+            <button onclick="window.location.reload()" class="bg-blue-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full hover:bg-blue-500 transition-all shadow-lg">
+                🔃 SYNC & TRANSLATE
+            </button>
+        </div>
+        
+        <div id="signalDisplay" class="bg-black/80 p-8 rounded-xl border border-white/10 min-h-[120px] flex items-center justify-center font-bold text-xl text-slate-100 text-center leading-relaxed">
+            Waiting for Director...
+        </div>
+        
+        <p class="text-[9px] text-slate-500 mt-4 text-center font-bold italic tracking-widest">
+            Click SYNC to trigger Google Translate auto-refresh
         </p>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-          apiKey: "AIzaSyDCOnj1LQU3BqCrbec9VP9Wg1v-AJrrpMw",
-          authDomain: "global-command-center-6235f.firebaseapp.com",
-          projectId: "global-command-center-6235f",
-          storageBucket: "global-command-center-6235f.firebasestorage.app",
-          messagingSenderId: "241628307606",
-          appId: "1:241628307606:web:7d5e3f60394671632062b7",
-          measurementId: "G-F4S7S0XH5Q"
-        };
-
+        const firebaseConfig = { apiKey: "AIzaSyDCOnj1LQU3BqCrbec9VP9Wg1v-AJrrpMw", authDomain: "global-command-center-6235f.firebaseapp.com", projectId: "global-command-center-6235f", storageBucket: "global-command-center-6235f.firebasestorage.app", messagingSenderId: "241628307606", appId: "1:241628307606:web:7d5e3f60394671632062b7" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        window.forceTranslateSync = () => {
-            const target = document.getElementById('text-target');
-            const originalText = target.innerText;
-            target.innerText = "";
-            setTimeout(() => {
-                target.innerText = originalText;
-                const container = document.getElementById('message-display');
-                container.classList.add('sync-flash');
-                setTimeout(() => container.classList.remove('sync-flash'), 500);
-            }, 50);
-        };
-
-        // 實時監聽：接收導演發給工程師的訊號 (d_to_e)
         onSnapshot(doc(db, "signals", "d_to_e"), (snap) => {
             if (snap.exists()) {
-                const data = snap.data();
-                document.getElementById('text-target').innerText = data.msg;
-                window.forceTranslateSync(); 
+                document.getElementById('signalDisplay').innerText = snap.data().msg;
+                document.querySelector('button').classList.add('animate-bounce');
             }
         });
     </script>
