@@ -2,125 +2,63 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Command Center | 極簡雙向主控台</title>
+    <title>Global Command Center | 核心主控台</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 物理規則：背景層必須位於 body 之上 (z-index >= 1) */
-        .bg-layer { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            z-index: 1; 
-            object-fit: cover; 
-            filter: brightness(0.15); 
-        }
-
-        /* 內容層：必須位於背景層之上 (z-index > 背景 z-index) */
-        .stage { 
-            position: relative; 
-            z-index: 10; 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-        }
+        /* 物理規則：背景層 z-index: 1 */
+        .bg-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; object-fit: cover; filter: brightness(0.12); }
+        /* 內容層 z-index: 10 */
+        .stage { position: relative; z-index: 10; height: 100vh; display: flex; flex-direction: column; }
         
-        /* 按鈕樣式：強化點擊感與辨識度 */
-        .tab-btn { 
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
-            color: #94a3b8; 
-            font-weight: 800; 
-            border-radius: 6px; 
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(4px);
-        }
+        .tab-btn { transition: all 0.2s; color: #94a3b8; font-size: 11px; font-weight: 800; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
+        .tab-btn.active { background: #eab308; color: #000; border-color: #eab308; }
         
-        .tab-btn:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-        }
-
-        .tab-btn.active { 
-            background: #eab308; 
-            color: #000; 
-            border-color: #eab308;
-            box-shadow: 0 0 15px rgba(234, 179, 8, 0.3);
-        }
-
+        /* 關鍵修正：隱藏但不移除，確保背景持續發送訊息 */
         .view-container { flex: 1; display: none; }
         .view-container.active { display: block; }
+        /* 強制讓發送端在後台運作 */
+        .keep-alive { display: block !important; position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none; }
+        
         iframe { width: 100%; height: 100%; border: none; }
-
-        /* 頂部導航條微調 */
-        nav {
-            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.85));
-        }
     </style>
 </head>
 <body class="bg-black text-slate-100 overflow-hidden font-sans">
-
     <img src="6.jpg" class="bg-layer" onerror="this.src='https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200'">
 
     <div class="stage">
-        <nav class="border-b border-white/10 p-3 flex items-center justify-between shadow-2xl">
-            <div class="flex items-center gap-4">
-                <button onclick="switchTab('hub')" id="btn-hub" class="tab-btn active px-6 py-2 uppercase text-xs tracking-tighter">
-                    🛰️ HUB 總覽
-                </button>
-                
-                <div class="h-6 w-[1px] bg-white/10 mx-2"></div>
-                
-                <button onclick="switchTab('d-in')" id="btn-d-in" class="tab-btn px-6 py-2 text-xs">
-                    <span class="block text-[8px] opacity-60 tracking-widest uppercase">Director</span>
-                    接收 (印尼)
-                </button>
-
-                <button onclick="switchTab('e-in')" id="btn-e-in" class="tab-btn px-6 py-2 text-xs">
-                    <span class="block text-[8px] opacity-60 tracking-widest uppercase">Engineer</span>
-                    接收 (中文)
-                </button>
+        <nav class="bg-slate-900/95 border-b border-white/10 p-3 flex items-center justify-between shadow-2xl">
+            <div class="flex items-center gap-6">
+                <button onclick="switchTab('hub')" id="btn-hub" class="tab-btn active px-4 py-2 uppercase">🛰️ HUB 總覽</button>
+                <div class="h-6 w-[1px] bg-white/10"></div>
+                <button onclick="switchTab('d-in')" id="btn-d-in" class="tab-btn px-4 py-2 uppercase">接收(印尼反饋)</button>
+                <button onclick="switchTab('e-in')" id="btn-e-in" class="tab-btn px-4 py-2 uppercase">接收(中文反饋)</button>
             </div>
-
-            <div class="flex gap-2">
-                <div class="hidden group-hover:flex items-center gap-2 mr-4">
-                    <button onclick="switchTab('d-out')" id="btn-d-out" class="text-[9px] text-slate-500 hover:text-yellow-500 underline uppercase">Dev-Out</button>
-                </div>
-                <div class="text-[10px] font-mono text-yellow-500 font-bold bg-yellow-500/10 px-3 py-1 rounded border border-yellow-500/20 animate-pulse">
-                    SYSTEM ACTIVE
-                </div>
+            
+            <div class="flex items-center gap-4">
+                <span class="text-[9px] text-slate-500 font-mono">ENGINES RUNNING IN BG</span>
+                <div class="text-[10px] font-mono text-yellow-500 font-bold bg-yellow-500/10 px-3 py-1 rounded border border-yellow-500/20 animate-pulse">SYSTEM ACTIVE</div>
             </div>
         </nav>
 
         <div id="view-hub" class="view-container active"><iframe src="環球協作指揮中心.html"></iframe></div>
         <div id="view-d-in" class="view-container"><iframe src="director_in.html"></iframe></div>
         <div id="view-e-in" class="view-container"><iframe src="engineer_in.html"></iframe></div>
-        
-        <div id="view-d-out" class="view-container"><iframe src="director_out.html"></iframe></div>
-        <div id="view-e-out" class="view-container"><iframe src="engineer_out.html"></iframe></div>
+
+        <div id="view-d-out" class="keep-alive"><iframe src="director_out.html"></iframe></div>
+        <div id="view-e-out" class="keep-alive"><iframe src="engineer_out.html"></iframe></div>
     </div>
 
     <script>
-        /**
-         * 切換標籤邏輯
-         * @param {string} tabId - 視圖識別碼
-         */
         function switchTab(tabId) {
-            // 隱藏所有視圖
+            // 只切換需要顯示的容器（不包含 keep-alive 的發送端）
             document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
-            // 取消所有按鈕啟用狀態
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             
-            // 顯示目標視圖
             const targetView = document.getElementById('view-' + tabId);
             const targetBtn = document.getElementById('btn-' + tabId);
             
-            if (targetView) targetView.classList.add('active');
-            if (targetBtn) targetBtn.classList.add('active');
-            
-            console.log(`[System] Switched to view: ${tabId}`);
+            if(targetView) targetView.classList.add('active');
+            if(targetBtn) targetBtn.classList.add('active');
         }
     </script>
 </body>
