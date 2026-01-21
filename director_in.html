@@ -1,69 +1,41 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html>
 <head>
     <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background: transparent; color: white; }
-        .msg-content { transition: all 0.3s ease; }
-        .sync-flash { animation: flash 0.5s ease-out; }
-        @keyframes flash {
-            0% { background: rgba(234, 179, 8, 0.5); }
-            100% { background: transparent; }
-        }
-    </style>
+    <style>body { background: transparent; color: white; }</style>
 </head>
 <body class="p-4">
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xs font-black text-yellow-500 tracking-tighter uppercase">Incoming Stream (From Engineer)</h2>
-        <button onclick="window.forceTranslateSync()" 
-                class="bg-yellow-500 hover:bg-yellow-400 text-black text-[10px] font-black px-3 py-1 rounded shadow-lg flex items-center gap-1 active:scale-95 transition-all">
-            <span>🔄</span> SYNC & TRANSLATE
-        </button>
-    </div>
-
-    <div id="message-display" class="bg-black/40 border border-white/10 rounded-lg p-4 min-h-[200px] msg-content">
-        <p class="text-sm leading-relaxed" id="text-target">
-            Waiting for incoming message from engineer...
+    <div class="bg-slate-900/95 p-6 rounded-2xl border-2 border-yellow-500/50 max-w-md mx-auto shadow-[0_0_20px_rgba(234,179,8,0.2)]">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-yellow-500 text-xs font-black uppercase tracking-[0.2em]">Director Receiver</h2>
+            <button onclick="window.location.reload()" class="bg-yellow-500 text-black text-[10px] font-black px-4 py-1.5 rounded-full hover:bg-yellow-400 transition-all shadow-lg">
+                🔃 點此同步翻譯
+            </button>
+        </div>
+        
+        <div id="signalDisplay" class="bg-black/80 p-8 rounded-xl border border-white/10 min-h-[120px] flex items-center justify-center font-bold text-xl text-slate-100 text-center leading-relaxed">
+            等待工程師訊號...
+        </div>
+        
+        <p class="text-[9px] text-slate-500 mt-4 text-center font-bold italic tracking-widest">
+            TIPS: 點擊按鈕刷新內容後，Chrome 會自動套用翻譯
         </p>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-          apiKey: "AIzaSyDCOnj1LQU3BqCrbec9VP9Wg1v-AJrrpMw",
-          authDomain: "global-command-center-6235f.firebaseapp.com",
-          projectId: "global-command-center-6235f",
-          storageBucket: "global-command-center-6235f.firebasestorage.app",
-          messagingSenderId: "241628307606",
-          appId: "1:241628307606:web:7d5e3f60394671632062b7",
-          measurementId: "G-F4S7S0XH5Q"
-        };
-
+        const firebaseConfig = { apiKey: "AIzaSyDCOnj1LQU3BqCrbec9VP9Wg1v-AJrrpMw", authDomain: "global-command-center-6235f.firebaseapp.com", projectId: "global-command-center-6235f", storageBucket: "global-command-center-6235f.firebasestorage.app", messagingSenderId: "241628307606", appId: "1:241628307606:web:7d5e3f60394671632062b7" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 定義同步函式到全域
-        window.forceTranslateSync = () => {
-            const target = document.getElementById('text-target');
-            const originalText = target.innerText;
-            target.innerText = ""; // 物理清空
-            setTimeout(() => {
-                target.innerText = originalText;
-                const container = document.getElementById('message-display');
-                container.classList.add('sync-flash');
-                setTimeout(() => container.classList.remove('sync-flash'), 500);
-            }, 50);
-        };
-
-        // 實時監聽：接收工程師發給導演的訊號 (e_to_d)
         onSnapshot(doc(db, "signals", "e_to_d"), (snap) => {
             if (snap.exists()) {
                 const data = snap.data();
-                document.getElementById('text-target').innerText = data.msg;
-                window.forceTranslateSync(); // 接收到新訊息時自動誘發翻譯偵測
+                document.getElementById('signalDisplay').innerText = data.msg;
+                // 收到新訊息時，自動讓按鈕閃爍，提醒你點擊翻譯
+                document.querySelector('button').classList.add('animate-bounce');
             }
         });
     </script>
