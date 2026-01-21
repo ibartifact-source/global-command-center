@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 保持簡潔風格，確保右鍵翻譯選單不會被遮擋 */
         body { background: transparent; color: white; }
         .msg-content { transition: all 0.3s ease; }
         .sync-flash { animation: flash 0.5s ease-out; }
@@ -16,8 +15,8 @@
 </head>
 <body class="p-4">
     <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xs font-black text-yellow-500 tracking-tighter uppercase">Incoming Stream</h2>
-        <button onclick="forceTranslateSync()" 
+        <h2 class="text-xs font-black text-yellow-500 tracking-tighter uppercase">Incoming Stream (From Engineer)</h2>
+        <button onclick="window.forceTranslateSync()" 
                 class="bg-yellow-500 hover:bg-yellow-400 text-black text-[10px] font-black px-3 py-1 rounded shadow-lg flex items-center gap-1 active:scale-95 transition-all">
             <span>🔄</span> SYNC & TRANSLATE
         </button>
@@ -29,33 +28,44 @@
         </p>
     </div>
 
-    <script>
-        function forceTranslateSync() {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyDCOnj1LQU3BqCrbec9VP9Wg1v-AJrrpMw",
+          authDomain: "global-command-center-6235f.firebaseapp.com",
+          projectId: "global-command-center-6235f",
+          storageBucket: "global-command-center-6235f.firebasestorage.app",
+          messagingSenderId: "241628307606",
+          appId: "1:241628307606:web:7d5e3f60394671632062b7",
+          measurementId: "G-F4S7S0XH5Q"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 定義同步函式到全域
+        window.forceTranslateSync = () => {
             const target = document.getElementById('text-target');
             const originalText = target.innerText;
-            
-            // 1. 物理清空：誘發 Chrome 偵測變動
-            target.innerText = "";
-            
-            // 2. 短暫延遲後重新填入內容
+            target.innerText = ""; // 物理清空
             setTimeout(() => {
                 target.innerText = originalText;
-                
-                // 3. 視覺反饋：閃爍提醒同步完成
                 const container = document.getElementById('message-display');
                 container.classList.add('sync-flash');
                 setTimeout(() => container.classList.remove('sync-flash'), 500);
-                
-                // 💡 提示：此時點擊右鍵「翻譯成中文」，Chrome 會更穩定地鎖定此區塊
-                console.log("Translation trigger sent to browser.");
             }, 50);
-        }
+        };
 
-        // 模擬自動接收訊息時也觸發同步 (如果是你原本就有的接收邏輯，請把此函式套進去)
-        // function onNewMessageArrive(newText) {
-        //    document.getElementById('text-target').innerText = newText;
-        //    forceTranslateSync(); 
-        // }
+        // 實時監聽：接收工程師發給導演的訊號 (e_to_d)
+        onSnapshot(doc(db, "signals", "e_to_d"), (snap) => {
+            if (snap.exists()) {
+                const data = snap.data();
+                document.getElementById('text-target').innerText = data.msg;
+                window.forceTranslateSync(); // 接收到新訊息時自動誘發翻譯偵測
+            }
+        });
     </script>
 </body>
 </html>
